@@ -14,6 +14,7 @@ class Appointment(Base):
     __tablename__ = "appointments"
     id = Column(Integer, primary_key=True, index=True)
     patient_name = Column(String, index=True)
+    phone_number = Column(String, nullable=True)  # Added phone number field
     reason = Column(String, nullable=True)
     start_time = Column(DateTime, index=True)
     canceled = Column(Boolean, default=False)

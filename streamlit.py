@@ -1,133 +1,330 @@
-# # Step5: Streamlit dashboard tesing (Just for Testing)
-
-# import streamlit as st
-# import datetime as dt
-# import requests
-
-# st.title("National Hospital Appointment Booking Dashboard")
-# base_url = st.text_input("Backend URL", "http://127.0.0.1:4444").rstrip("/")
-
-
-# patient_name = st.text_input("Patient name")
-# reason = st.text_input("Reason")
-# start_date = st.date_input("Date", value=dt.date.today() + dt.timedelta(days=1))
-# start_time = st.time_input("Time", value=dt.time(9, 0))
-
-# if st.button("Schedule"):
-#     start_dt = dt.datetime.combine(start_date, start_time)
-#     payload = {
-#     "patient_name": patient_name.strip(),
-#     "reason": reason.strip() or None,
-#     "start_time": start_dt.isoformat(),
-#     }
-#     try:
-#         resp = requests.post(f"{base_url}/schedule_appointments/", json=payload, timeout=10)
-#         resp.raise_for_status()
-#         st.success("Scheduled")
-#         st.rerun()
-#     except requests.HTTPError as http_err:
-#         st.error(f"Schedule failed: {resp.status_code} - {resp.text}")
-#     except requests.RequestException as exc:
-#         st.error(f"Schedule failed: {exc}")
-
-
-# st.divider()
-# st.subheader("Cancel")
-
-# cancel_name = st.text_input("Patient name to cancel", key="cancel_name")
-# cancel_date = st.date_input("Date to cancel", key="cancel_date", value=dt.date.today())
-
-# if st.button("Cancel appointments"):
-#     payload = {"patient_name": cancel_name.strip(), "date": cancel_date.isoformat()}
-#     try:
-#         resp = requests.post(f"{base_url}/cancel_appointments/", json=payload, timeout=10)
-#         resp.raise_for_status()
-#         data = resp.json() if resp.content else {}
-#         st.success(f"Cancelled: {data.get('canceled_count', 0)}")
-#         st.rerun()
-#     except requests.HTTPError as http_err:
-#         st.error(f"Cancel failed: {resp.status_code} - {resp.text}")
-#     except requests.RequestException as exc:
-#         st.error(f"Cancel failed: {exc}")
-
-
-# appointments_date = st.date_input("Date to check appointments", key="check_appointment_date", value=dt.datetime.today())
-# if st.button("Check appointments"):
-#     try:
-#         params = {"date": appointments_date.isoformat()}
-#         resp = requests.get(f"{base_url}/list_appointments/", params=params, timeout=10)
-#         resp.raise_for_status()
-#         st.dataframe(resp.json(), use_container_width=True, hide_index=True)
-#     except requests.RequestException as exc:
-#         st.warning(f"Could not load appointments: {exc}")
-
-
-
-# filepath: d:\COURSES\Hospital Appointment Booking Voice Agent\streamlit.py
-# Step5: Streamlit dashboard tesing (Just for Testing)
-
 import streamlit as st
-import datetime as dt
 import requests
+import datetime as dt
+from typing import Optional
 
-st.title("National Hospital Appointment Booking Dashboard")
-base_url = st.text_input("Backend URL", "http://127.0.0.1:4444").rstrip("/")
+# Backend URL
+BACKEND_URL = "http://127.0.0.1:4444"
 
+st.set_page_config(
+    page_title="Smart Care Medical Center",
+    page_icon="🏥",
+    layout="wide"
+)
 
-patient_name = st.text_input("Patient name")
-reason = st.text_input("Reason")
-start_date = st.date_input("Date", value=dt.date.today() + dt.timedelta(days=1))
-start_time = st.time_input("Time", value=dt.time(9, 0))
+st.title("🏥 Smart Care Medical Center")
+st.subheader("Appointment Management System")
 
-if st.button("Schedule"):
-    start_dt = dt.datetime.combine(start_date, start_time)
-    payload = {
-    "patient_name": patient_name.strip(),
-    "reason": reason.strip() or None,
-    "start_time": start_dt.isoformat(),
-    }
+# ==================== HELPER FUNCTIONS ====================
+
+def test_connection() -> dict:
+    """Test connection to backend API."""
     try:
-        resp = requests.post(f"{base_url}/schedule_appointments/", json=payload, timeout=10)
-        resp.raise_for_status()
-        st.success("✅ Appointment scheduled successfully!")
-    except requests.HTTPError as http_err:
-        st.error(f"Schedule failed: {resp.status_code} - {resp.text}")
-    except requests.RequestException as exc:
-        st.error(f"Schedule failed: {exc}")
-
-
-st.divider()
-st.subheader("Cancel")
-
-cancel_name = st.text_input("Patient name to cancel", key="cancel_name")
-cancel_date = st.date_input("Date to cancel", key="cancel_date", value=dt.date.today())
-
-if st.button("Cancel appointments"):
-    payload = {"patient_name": cancel_name.strip(), "date": cancel_date.isoformat()}
-    try:
-        resp = requests.post(f"{base_url}/cancel_appointments/", json=payload, timeout=10)
-        resp.raise_for_status()
-        data = resp.json() if resp.content else {}
-        st.success(f"✅ Cancelled {data.get('canceled_count', 0)} appointment(s) successfully!")
-    except requests.HTTPError as http_err:
-        st.error(f"Cancel failed: {resp.status_code} - {resp.text}")
-    except requests.RequestException as exc:
-        st.error(f"Cancel failed: {exc}")
-
-
-st.divider()
-st.subheader("Check Appointments")
-
-appointments_date = st.date_input("Date to check appointments", key="check_appointment_date", value=dt.datetime.today())
-if st.button("Check appointments"):
-    try:
-        params = {"date": appointments_date.isoformat()}
-        resp = requests.get(f"{base_url}/list_appointments/", params=params, timeout=10)
-        resp.raise_for_status()
-        appointments = resp.json()
-        if appointments:
-            st.dataframe(appointments, use_container_width=True, hide_index=True)
+        # Increase timeout to 15 seconds
+        response = requests.get(
+            f"{BACKEND_URL}/", 
+            timeout=15  # ← INCREASED FROM 5 to 15
+        )
+        
+        if response.status_code == 200:
+            return {
+                "success": True,
+                "message": "✅ Connected to backend successfully!",
+                "status_code": response.status_code
+            }
         else:
-            st.info("No appointments found for this date.")
-    except requests.RequestException as exc:
-        st.warning(f"Could not load appointments: {exc}")
+            return {
+                "success": False,
+                "message": f"⚠️ Backend returned status {response.status_code}",
+                "status_code": response.status_code
+            }
+    
+    except requests.exceptions.Timeout:
+        return {
+            "success": False,
+            "message": "❌ Connection timeout. Is the backend running?",
+            "error": "TIMEOUT"
+        }
+    
+    except requests.exceptions.ConnectionError:
+        return {
+            "success": False,
+            "message": "❌ Cannot connect to backend. Make sure backend.py is running on port 4444.",
+            "error": "CONNECTION_ERROR"
+        }
+    
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"❌ Error: {str(e)}",
+            "error": str(e)
+        }
+
+
+def schedule_appointment(
+    patient_name: str,
+    reason: str,
+    start_time: dt.datetime,
+    phone_number: Optional[str] = None
+) -> dict:
+    """Schedule a new appointment."""
+    try:
+        payload = {
+            "patient_name": patient_name,
+            "reason": reason,
+            "start_time": start_time.isoformat(),
+            "phone_number": phone_number
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/schedule_appointments/",
+            json=payload,
+            timeout=15  # ← INCREASED TIMEOUT
+        )
+        
+        if response.status_code == 200:
+            return {"success": True, "data": response.json()}
+        else:
+            return {
+                "success": False,
+                "message": f"Error {response.status_code}: {response.text}"
+            }
+    
+    except requests.exceptions.Timeout:
+        return {
+            "success": False,
+            "message": "Request timeout. Please try again."
+        }
+    
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+def list_appointments(date: dt.date) -> dict:
+    """List appointments for a specific date."""
+    try:
+        response = requests.get(
+            f"{BACKEND_URL}/list_appointments/",
+            params={"date": date.isoformat()},
+            timeout=15  # ← INCREASED TIMEOUT
+        )
+        
+        if response.status_code == 200:
+            return {"success": True, "data": response.json()}
+        else:
+            return {
+                "success": False,
+                "message": f"Error {response.status_code}: {response.text}"
+            }
+    
+    except requests.exceptions.Timeout:
+        return {
+            "success": False,
+            "message": "Request timeout. Please try again."
+        }
+    
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+def cancel_appointment(patient_name: str, date: dt.date, phone_number: Optional[str] = None) -> dict:
+    """Cancel appointment."""
+    try:
+        payload = {
+            "patient_name": patient_name,
+            "date": date.isoformat(),
+            "phone_number": phone_number
+        }
+        
+        response = requests.post(
+            f"{BACKEND_URL}/cancel_appointments/",
+            json=payload,
+            timeout=15  # ← INCREASED TIMEOUT
+        )
+        
+        if response.status_code == 200:
+            return {"success": True, "data": response.json()}
+        else:
+            return {
+                "success": False,
+                "message": f"Error {response.status_code}: {response.text}"
+            }
+    
+    except requests.exceptions.Timeout:
+        return {
+            "success": False,
+            "message": "Request timeout. Please try again."
+        }
+    
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+
+# ==================== SIDEBAR ====================
+
+with st.sidebar:
+    st.header("🔧 System Status")
+    
+    if st.button("🔌 Test Connection", use_container_width=True):
+        with st.spinner("Testing connection..."):
+            result = test_connection()
+            
+            if result["success"]:
+                st.success(result["message"])
+            else:
+                st.error(result["message"])
+                
+                # Show helpful hints
+                if result.get("error") == "CONNECTION_ERROR":
+                    st.info("💡 **How to fix:**\n1. Open Terminal\n2. Run: `python backend.py`\n3. Wait for 'Uvicorn running' message\n4. Try connecting again")
+                elif result.get("error") == "TIMEOUT":
+                    st.info("💡 **How to fix:**\n1. Check if backend is running\n2. Check if port 4444 is available\n3. Restart backend if needed")
+    
+    st.divider()
+    
+    st.markdown("""
+    ### 📖 Quick Links
+    - [API Docs](http://127.0.0.1:4444/docs)
+    - [Real-Time Dashboard](http://127.0.0.1:4444/dashboard)
+    - [Health Check](http://127.0.0.1:4444/)
+    """)
+    
+    st.divider()
+    
+    st.caption("Smart Care Medical Center v3.0")
+
+
+# ==================== MAIN TABS ====================
+
+tab1, tab2, tab3 = st.tabs(["📅 Schedule", "📋 View Appointments", "❌ Cancel"])
+
+# ==================== TAB 1: SCHEDULE ====================
+
+with tab1:
+    st.header("📅 Schedule New Appointment")
+    
+    with st.form("schedule_form"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            patient_name = st.text_input("Patient Name *", placeholder="John Doe")
+            reason = st.text_input("Reason for Visit *", placeholder="General Checkup")
+        
+        with col2:
+            appointment_date = st.date_input(
+                "Appointment Date *",
+                min_value=dt.date.today()
+            )
+            appointment_time = st.time_input("Appointment Time *", value=dt.time(10, 0))
+        
+        phone_number = st.text_input(
+            "WhatsApp Phone Number (Optional)",
+            placeholder="+923320825825",
+            help="Include country code for WhatsApp notifications"
+        )
+        
+        submitted = st.form_submit_button("📅 Schedule Appointment", use_container_width=True)
+        
+        if submitted:
+            if not patient_name or not reason:
+                st.error("❌ Please fill in all required fields")
+            else:
+                # Combine date and time
+                start_time = dt.datetime.combine(appointment_date, appointment_time)
+                
+                with st.spinner("Scheduling appointment..."):
+                    result = schedule_appointment(
+                        patient_name=patient_name,
+                        reason=reason,
+                        start_time=start_time,
+                        phone_number=phone_number if phone_number else None
+                    )
+                    
+                    if result["success"]:
+                        data = result["data"]
+                        st.success(f"✅ Appointment scheduled successfully!")
+                        st.info(f"""
+                        **Appointment Details:**
+                        - **ID:** #{data['id']}
+                        - **Patient:** {data['patient_name']}
+                        - **Date/Time:** {data['start_time']}
+                        - **Reason:** {data['reason']}
+                        - **WhatsApp:** {"✅ Sent" if data.get('whatsapp_sent') else "❌ Not sent"}
+                        """)
+                    else:
+                        st.error(f"❌ {result.get('message', 'Failed to schedule appointment')}")
+
+
+# ==================== TAB 2: VIEW ====================
+
+with tab2:
+    st.header("📋 View Appointments")
+    
+    view_date = st.date_input(
+        "Select Date",
+        value=dt.date.today(),
+        key="view_date"
+    )
+    
+    if st.button("🔍 Load Appointments", use_container_width=True):
+        with st.spinner("Loading appointments..."):
+            result = list_appointments(view_date)
+            
+            if result["success"]:
+                appointments = result["data"]
+                
+                if not appointments:
+                    st.info("📭 No appointments found for this date")
+                else:
+                    st.success(f"✅ Found {len(appointments)} appointment(s)")
+                    
+                    for apt in appointments:
+                        status = "❌ CANCELED" if apt["canceled"] else "✅ ACTIVE"
+                        
+                        with st.expander(f"#{apt['id']} - {apt['patient_name']} ({status})"):
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                st.write(f"**Patient:** {apt['patient_name']}")
+                                st.write(f"**Reason:** {apt['reason']}")
+                            
+                            with col2:
+                                st.write(f"**Time:** {apt['start_time']}")
+                                st.write(f"**Status:** {status}")
+            else:
+                st.error(f"❌ {result.get('message', 'Failed to load appointments')}")
+
+
+# ==================== TAB 3: CANCEL ====================
+
+with tab3:
+    st.header("❌ Cancel Appointment")
+    
+    with st.form("cancel_form"):
+        cancel_name = st.text_input("Patient Name *", placeholder="John Doe")
+        cancel_date = st.date_input("Appointment Date *")
+        cancel_phone = st.text_input(
+            "WhatsApp Phone Number (Optional)",
+            placeholder="+923320825825"
+        )
+        
+        cancel_submitted = st.form_submit_button("❌ Cancel Appointment", use_container_width=True)
+        
+        if cancel_submitted:
+            if not cancel_name:
+                st.error("❌ Please enter patient name")
+            else:
+                with st.spinner("Canceling appointment..."):
+                    result = cancel_appointment(
+                        patient_name=cancel_name,
+                        date=cancel_date,
+                        phone_number=cancel_phone if cancel_phone else None
+                    )
+                    
+                    if result["success"]:
+                        data = result["data"]
+                        st.success(f"✅ Canceled {data['canceled_count']} appointment(s)")
+                        if data.get('whatsapp_sent'):
+                            st.info("📱 Cancellation notification sent via WhatsApp")
+                    else:
+                        st.error(f"❌ {result.get('message', 'Failed to cancel appointment')}")

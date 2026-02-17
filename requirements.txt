@@ -1,0 +1,39 @@
+# Core Web Framework
+fastapi==0.109.1
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.25
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# HTTP Client
+requests==2.31.0
+
+# Twilio for WhatsApp
+twilio==8.11.0
+
+# LangChain and RAG Dependencies (pinned compatible versions)
+langchain-core==0.1.23
+langchain==0.1.7
+langchain-community==0.0.20
+langchain-openai==0.0.5
+langchain-text-splitters==0.0.1
+
+# Vector Store
+faiss-cpu==1.8.0
+
+# Azure OpenAI
+openai==1.10.0
+
+# WebSocket Support (included in uvicorn[standard])
+websockets==12.0
+
+# Streamlit Testing Interface
+streamlit==1.31.0
+
+# Data Validation
+pydantic==2.6.1
+pydantic-settings==2.1.0
