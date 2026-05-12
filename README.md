@@ -519,20 +519,6 @@ CREATE INDEX idx_patient_name ON appointments(patient_name);
 
 ---
 
-## Demo
-
-Watch the demo video here: [Link to be added]
-
-**Screenshots:**
-
-*Real-time Dashboard*
-![Dashboard Preview](screenshots/dashboard.png)
-
-*WhatsApp Confirmation*
-![WhatsApp Message](screenshots/whatsapp.png)
-
----
-
 ## Contributing
 
 Contributions are welcome. Please follow these guidelines:
